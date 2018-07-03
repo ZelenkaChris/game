@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <script>
+      var canvas, ctx;
+      function initialize(){
+        canvas = document.getElementById("canvas");
+        ctx = canvas.getContext('2d');
+        main();
+      }
+    </script>
+    <style>
+      #canvas {
+        border:1px solid; 
+        transform: translate(25%, 25%);
+      }
+    </style>
+  </head>
+  <body onload="initialize()">
+    <canvas id="canvas" width="1280" height="720"></canvas>
+    
+    <script src="es5/game.js"></script>  
+  </body>
+  
+  
+</html>

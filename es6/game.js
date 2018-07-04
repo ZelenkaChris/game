@@ -4,6 +4,8 @@ const playerSpeed = 10;
 const maxVel = 10;
 const friction = 0.96;
 
+var walls = [];
+
 
 var player;
 
@@ -31,9 +33,32 @@ var Key = {
 document.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false);
 document.addEventListener('keydown', function(event) { Key.onKeydown(event); }, false);
 
+class Wall {
+  constructor(x, y, h, w){
+    this.position = [x,y];
+    this.size = [h,w];
+    this.fillstyle = 'black';
+  }
+  
+  draw() {
+    ctx.fillStyle = this.fillstyle;
+    ctx.fillRect(this.position[0],
+                 this.position[1],
+                 this.size[0],
+                 this.size[1]);
+  }
+}
+
+
+function loadLevel() {
+  walls.push(new Wall(800, 600, 120, 120));
+  walls.push(new Wall(500, 400, 120, 120));
+}
+
 class Player {
   constructor(x, y, h, w) {
     this.position = [x,y];
+    this.newPosition = [x,y];
     this.size = [h,w];
     this.velocity = [0,0];
     this.acceleration = [0,1];
@@ -55,8 +80,38 @@ class Player {
   }
   
   move(x, y) {
+    
+
+  }
+  
+  move() {
+    let x = 0;
+    let y = 0;
+    
+    if ( Key.isDown(Key.UP) ) {
+      if (!this.isJump) {
+        y += -playerSpeed * 2;
+        this.isJump = true;
+      } else if (this.isWall) {
+        y += -playerSpeed * 2;
+        this.velocity[1] = 0;
+        this.velocity[0] = 6 * this.reverseX;
+      }
+    }  
+
+    if ( Key.isDown(Key.LEFT) ) {
+      this.acceleration[0] = -0.5;
+    }
+    if ( Key.isDown(Key.RIGHT) ) {
+      this.acceleration[0] = 0.5;
+    }
+    if ( (Key.isDown(Key.RIGHT) && Key.isDown(Key.LEFT)) || (!Key.isDown(Key.RIGHT) && !Key.isDown(Key.LEFT))){
+      this.acceleration[0] = 0
+    }
+    
     this.velocity[0] += x + this.acceleration[0];
     this.velocity[1] += y + this.acceleration[1];
+    
     
     if (!this.isJump) {
       if(this.velocity[0] < 3 && this.velocity[0] > -3) {
@@ -79,9 +134,63 @@ class Player {
       this.velocity[0] = -10;
     }
     
-    this.position[0] += this.velocity[0];
-    this.position[1] += this.velocity[1];
+    this.newPosition = [this.position[0] + this.velocity[0],
+                        this.position[1] + this.velocity[1] ];
+    
+    
+    this.checkValidMove();
+    
+    this.position = this.newPosition;
+      
+    
+    
   }
+  
+  checkValidMove() {
+    if ( this.newPosition[0] < 0 ) {
+      this.newPosition[0] = 0;
+      this.velocity[0] = 0;
+      this.isWall = true;
+      this.reverseX = 1;
+    } else  if ( this.newPosition[0] + this.size[0] > 1280 ) {
+      this.newPosition[0] = 1280 - this.size[0];
+      this.velocity[0] = 0;
+      this.isWall = true;
+      this.reverseX = -1;
+    } else {
+      this.isWall = false;
+    }
+
+    if ( this.newPosition[1] < 0 ) {
+      this.newPosition[1] = 0;
+      this.velocity[1] = 0;
+    }
+    if ( this.newPosition[1] + this.size[1] > 720 ) {
+      this.newPosition[1] = 720 - this.size[1];
+      this.velocity[1] = 0;
+      this.isJump = false;
+      this.isWall = false;
+    }
+    
+    walls.forEach(w =>{
+      if (this.checkCollide(w))
+        w.fillstyle = 'red';
+      else
+        w.fillstyle = 'black';
+    });
+    
+  }
+  
+  checkCollide(obj) {
+    if ( this.position[1] + this.size[1] < obj.position[1] ||
+         this.position[1] > obj.position[1] + obj.size[1] ||
+         this.position[0] > obj.position[0] + obj.size[0] ||
+         this.position[0] + this.size[0] < obj.position[0] ) {
+      return false;
+    } else
+      return true;
+  }
+  
 }
 
 function debugDraw() {
@@ -100,6 +209,9 @@ function loop() {
 
 function redraw() {
   ctx.clearRect(0,0,1280,720);
+  walls.forEach(w => {
+    w.draw();
+  });
   player.draw();
   
   if (debugLog) {
@@ -107,67 +219,12 @@ function redraw() {
   }
 }
 
-function playerMove() {
-  let x = 0;
-  let y = 0;
-  
-  if ( Key.isDown(Key.UP) ) {
-    if (!player.isJump) {
-      y += -playerSpeed * 2;
-      player.isJump = true;
-    } else if (player.isWall) {
-      y += -playerSpeed * 2;
-      player.velocity[1] = 0;
-      player.velocity[0] = 8 * player.reverseX;
-    }
-  }  
-  
-  if ( Key.isDown(Key.LEFT) ) {
-    player.acceleration[0] = -0.5;
-  }
-  if ( Key.isDown(Key.RIGHT) ) {
-    player.acceleration[0] = 0.5;
-  }
-  if ( (Key.isDown(Key.RIGHT) && Key.isDown(Key.LEFT)) || (!Key.isDown(Key.RIGHT) && !Key.isDown(Key.LEFT))){
-    player.acceleration[0] = 0
-  }
-  
-  player.move(x,y);
-}
-
-function checkValidMove() {
-  if ( player.position[0] < 0 ) {
-    player.position[0] = 0;
-    player.velocity[0] = 0;
-    player.isWall = true;
-    player.reverseX = 1;
-  } else  if ( player.position[0] + player.size[0] > 1280 ) {
-    player.position[0] = 1280 - player.size[0];
-    player.velocity[0] = 0;
-    player.isWall = true;
-    player.reverseX = -1;
-  } else {
-    player.isWall = false;
-  }
-  
-  if ( player.position[1] < 0 ) {
-    player.position[1] = 0;
-    player.velocity[1] = 0;
-  }
-  if ( player.position[1] + player.size[1] > 720 ) {
-    player.position[1] = 720 - player.size[1];
-    player.velocity[1] = 0;
-    player.isJump = false;
-    player.isWall = false;
-  }
-}
-
 function control() {
-  playerMove();
-  checkValidMove();
+  player.move();
 }
 
 function main() {
   player = new Player(10,10,50,50);
+  loadLevel();
   loop();
 }

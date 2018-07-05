@@ -79,11 +79,6 @@ class Player {
                  this.size[1]);
   }
   
-  move(x, y) {
-    
-
-  }
-  
   move() {
     let x = 0;
     let y = 0;
@@ -142,8 +137,6 @@ class Player {
     
     this.position = this.newPosition;
       
-    
-    
   }
   
   checkValidMove() {
@@ -174,21 +167,48 @@ class Player {
     
     walls.forEach(w =>{
       if (this.checkCollide(w))
-        w.fillstyle = 'red';
-      else
-        w.fillstyle = 'black';
+        this.handleCollide(w);
     });
     
   }
   
   checkCollide(obj) {
-    if ( this.position[1] + this.size[1] < obj.position[1] ||
-         this.position[1] > obj.position[1] + obj.size[1] ||
-         this.position[0] > obj.position[0] + obj.size[0] ||
-         this.position[0] + this.size[0] < obj.position[0] ) {
-      return false;
-    } else
-      return true;
+    return  !( this.newPosition[1] + this.size[1] < obj.position[1] ||
+         this.newPosition[1] > obj.position[1] + obj.size[1] ||
+         this.newPosition[0] > obj.position[0] + obj.size[0] ||
+         this.newPosition[0] + this.size[0] < obj.position[0] );
+  }
+  
+  handleCollide(obj) {
+
+    let playerCenter = [this.newPosition[0] + this.size[0]/2, this.newPosition[1] + this.size[1]/2];
+    let objCenter = [obj.position[0] + obj.size[0]/2, obj.position[1] + obj.size[1]/2]
+    
+    let collideVector = [playerCenter[0] - objCenter[0], playerCenter[1] - objCenter[1]];
+    
+    if (Math.abs(collideVector[0]) > Math.abs(collideVector[1])){
+      if(collideVector[0] < 0) {
+        this.newPosition[0] -= this.newPosition[0] + this.size[0] - obj.position[0]
+        this.reverseX = -1; 
+      }
+      else {
+        this.newPosition[0] += obj.position[0] + obj.size[0] - this.newPosition[0]; 
+        this.reverseX = 1;
+      }
+      this.velocity[0] = 0;
+      
+      if (this.isJump)
+        this.isWall = true;
+      
+    } else {
+      if(collideVector[1] < 0) 
+        this.newPosition[1] -= this.newPosition[1] + this.size[1] - obj.position[1];
+      else 
+        this.newPosition[1] += obj.position[1] + obj.size[1] - this.newPosition[1];
+      
+      this.velocity[1] = 0;
+      this.isJump = false;
+    }
   }
   
 }

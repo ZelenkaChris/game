@@ -201,10 +201,12 @@ var Player = function () {
 
         if (this.isJump) this.isWall = true;
       } else {
-        if (collideVector[1] < 0) this.newPosition[1] -= this.newPosition[1] + this.size[1] - obj.position[1];else this.newPosition[1] += obj.position[1] + obj.size[1] - this.newPosition[1];
+        if (collideVector[1] < 0) {
+          this.newPosition[1] -= this.newPosition[1] + this.size[1] - obj.position[1];
+          this.isJump = false;
+        } else this.newPosition[1] += obj.position[1] + obj.size[1] - this.newPosition[1];
 
         this.velocity[1] = 0;
-        this.isJump = false;
       }
     }
   }]);

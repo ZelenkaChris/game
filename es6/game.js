@@ -188,13 +188,14 @@ class Player {
     
     if (Math.abs(collideVector[0]) > Math.abs(collideVector[1])){
       if(collideVector[0] < 0) {
-        this.newPosition[0] -= this.newPosition[0] + this.size[0] - obj.position[0]
+        this.newPosition[0] -= this.newPosition[0] + this.size[0] - obj.position[0] + 0.01;
         this.reverseX = -1; 
       }
       else {
-        this.newPosition[0] += obj.position[0] + obj.size[0] - this.newPosition[0]; 
+        this.newPosition[0] += obj.position[0] + obj.size[0] - this.newPosition[0] - 0.01; 
         this.reverseX = 1;
       }
+      
       this.velocity[0] = 0;
       
       if (this.isJump)
@@ -216,10 +217,23 @@ class Player {
 }
 
 function debugDraw() {
+
+  let k = Object.keys(Key.pressed).map( x => {
+    if (x == Key.UP)
+      return 'Up';
+    else if (x == Key.DOWN)
+      return 'Down';
+    else if (x == Key.LEFT)
+      return 'Left';
+    else
+      return 'Right';
+  })
+  
   ctx.fillStyle = "black";
   ctx.font = "10px Arial";
   ctx.fillText("Player Speed: " + player.velocity, 10, 10);
   ctx.fillText("Player wall: "+ player.isWall, 10, 20);
+  ctx.fillText("Keys Hit: " + k, 10, 30);
   
 }
 

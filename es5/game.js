@@ -94,6 +94,20 @@ var Player = function () {
   }, {
     key: 'move',
     value: function move() {
+
+      this.handleKeys();
+
+      this.velocityAndFriction();
+
+      this.newPosition = [this.position[0] + this.velocity[0], this.position[1] + this.velocity[1]];
+
+      this.checkValidMove();
+
+      this.position = this.newPosition;
+    }
+  }, {
+    key: 'handleKeys',
+    value: function handleKeys() {
       var x = 0;
       var y = 0;
 
@@ -120,7 +134,10 @@ var Player = function () {
 
       this.velocity[0] += x + this.acceleration[0];
       this.velocity[1] += y + this.acceleration[1];
-
+    }
+  }, {
+    key: 'velocityAndFriction',
+    value: function velocityAndFriction() {
       if (!this.isJump) {
         if (this.velocity[0] < 3 && this.velocity[0] > -3) {
           if (this.velocity[0] < 0) this.velocity[0] = Math.ceil(this.velocity[0] * friction * 10) / 10;else this.velocity[0] = Math.floor(this.velocity[0] * friction * 10) / 10;
@@ -134,18 +151,13 @@ var Player = function () {
       if (this.velocity[0] < -10) {
         this.velocity[0] = -10;
       }
-
-      this.newPosition = [this.position[0] + this.velocity[0], this.position[1] + this.velocity[1]];
-
-      this.checkValidMove();
-
-      this.position = this.newPosition;
     }
   }, {
     key: 'checkValidMove',
     value: function checkValidMove() {
       var _this = this;
 
+      this.isJump = true;
       if (this.newPosition[0] < 0) {
         this.newPosition[0] = 0;
         this.velocity[0] = 0;
@@ -186,7 +198,6 @@ var Player = function () {
 
       var playerCenter = [this.newPosition[0] + this.size[0] / 2, this.newPosition[1] + this.size[1] / 2];
       var objCenter = [obj.position[0] + obj.size[0] / 2, obj.position[1] + obj.size[1] / 2];
-
       var collideVector = [playerCenter[0] - objCenter[0], playerCenter[1] - objCenter[1]];
 
       if (Math.abs(collideVector[0]) > Math.abs(collideVector[1])) {
@@ -225,7 +236,8 @@ function debugDraw() {
   ctx.font = "10px Arial";
   ctx.fillText("Player Speed: " + player.velocity, 10, 10);
   ctx.fillText("Player wall: " + player.isWall, 10, 20);
-  ctx.fillText("Keys Hit: " + k, 10, 30);
+  ctx.fillText("Player Jump: " + player.isJump, 10, 30);
+  ctx.fillText("Keys Hit: " + k, 10, 40);
 }
 
 function loop() {

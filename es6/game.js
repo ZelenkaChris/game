@@ -80,6 +80,21 @@ class Player {
   }
   
   move() {
+    
+    this.handleKeys();
+    
+    this.velocityAndFriction();
+    
+    this.newPosition = [this.position[0] + this.velocity[0],
+                        this.position[1] + this.velocity[1] ];
+        
+    this.checkValidMove();
+    
+    this.position = this.newPosition;
+      
+  }
+  
+  handleKeys() {
     let x = 0;
     let y = 0;
     
@@ -106,8 +121,9 @@ class Player {
     
     this.velocity[0] += x + this.acceleration[0];
     this.velocity[1] += y + this.acceleration[1];
-    
-    
+  }
+  
+  velocityAndFriction() {
     if (!this.isJump) {
       if(this.velocity[0] < 3 && this.velocity[0] > -3) {
         if (this.velocity[0] < 0) 
@@ -128,18 +144,10 @@ class Player {
     if (this.velocity[0] < -10 ) {
       this.velocity[0] = -10;
     }
-    
-    this.newPosition = [this.position[0] + this.velocity[0],
-                        this.position[1] + this.velocity[1] ];
-    
-    
-    this.checkValidMove();
-    
-    this.position = this.newPosition;
-      
   }
   
   checkValidMove() {
+    this.isJump = true;
     if ( this.newPosition[0] < 0 ) {
       this.newPosition[0] = 0;
       this.velocity[0] = 0;
@@ -183,7 +191,6 @@ class Player {
 
     let playerCenter = [this.newPosition[0] + this.size[0]/2, this.newPosition[1] + this.size[1]/2];
     let objCenter = [obj.position[0] + obj.size[0]/2, obj.position[1] + obj.size[1]/2]
-    
     let collideVector = [playerCenter[0] - objCenter[0], playerCenter[1] - objCenter[1]];
     
     if (Math.abs(collideVector[0]) > Math.abs(collideVector[1])){
@@ -233,7 +240,8 @@ function debugDraw() {
   ctx.font = "10px Arial";
   ctx.fillText("Player Speed: " + player.velocity, 10, 10);
   ctx.fillText("Player wall: "+ player.isWall, 10, 20);
-  ctx.fillText("Keys Hit: " + k, 10, 30);
+  ctx.fillText("Player Jump: " + player.isJump, 10, 30);
+  ctx.fillText("Keys Hit: " + k, 10, 40);
   
 }
 

@@ -5,8 +5,6 @@ const maxVel = 10;
 const friction = 0.96;
 
 var walls = [];
-
-
 var player;
 
 var Key = {
@@ -33,11 +31,12 @@ var Key = {
 document.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false);
 document.addEventListener('keydown', function(event) { Key.onKeydown(event); }, false);
 
-class Wall {
-  constructor(x, y, h, w){
+class GameObject {
+  constructor(x, y, h, w, c) {
     this.position = [x,y];
     this.size = [h,w];
-    this.fillstyle = 'black';
+    
+    this.fillstyle = c;
   }
   
   draw() {
@@ -49,49 +48,66 @@ class Wall {
   }
 }
 
-
-function loadLevel() {
-  walls.push(new Wall(800, 600, 120, 120));
-  walls.push(new Wall(500, 400, 120, 120));
-}
-
-class Player {
-  constructor(x, y, h, w) {
-    this.position = [x,y];
-    this.newPosition = [x,y];
-    this.size = [h,w];
+class Character extends GameObject {
+  constructor(x, y, h, w, c) {
+    super(x, y, h, w, c);
+    
     this.velocity = [0,0];
     this.acceleration = [0,1];
-    this.fillstyle = 'green';
-    
+    this.newPosition = [x,y];
+  
     this.isJump = false;
     this.isWall = false;
     this.reverseX = 1;
-    
-    this.reverseCount = 0;
   }
   
-  draw() {
-    ctx.fillStyle = this.fillstyle;
-    ctx.fillRect(this.position[0],
-                 this.position[1],
-                 this.size[0],
-                 this.size[1]);
+  move() {
+    console.log("move");
+  }
+  
+  checkCollide(obj) {
+    return  !( this.newPosition[1] + this.size[1] < obj.position[1] ||
+         this.newPosition[1] > obj.position[1] + obj.size[1] ||
+         this.newPosition[0] > obj.position[0] + obj.size[0] ||
+         this.newPosition[0] + this.size[0] < obj.position[0] );
+  }
+  
+  velocityAndFriction() {
+    if (!this.isJump) {
+      if(this.velocity[0] < 3 && this.velocity[0] > -3) {
+        if (this.velocity[0] < 0) 
+          this.velocity[0] = Math.ceil(this.velocity[0] * friction * 10) / 10;
+        else 
+          this.velocity[0] = Math.floor(this.velocity[0] * friction * 10) / 10;
+        if( this.velocity[0] <= 0.2 && this.velocity[0] >= -0.2 )
+          this.velocity[0] = 0;
+      } else {
+        this.velocity[0] = Math.round(this.velocity[0] * friction * 100) / 100;
+      }
+    }
+      
+    if ( this.velocity[0] > 10  ) this.velocity[0] = 10;
+    if ( this.velocity[0] < -10 ) this.velocity[0] = -10;
+  }
+  
+  
+}
+
+
+
+class Player extends Character{
+  constructor(x, y, h, w) {
+    super(x, y, h, w, 'green');  
   }
   
   move() {
     
-    this.handleKeys();
-    
-    this.velocityAndFriction();
-    
+    this.handleKeys();    
+    this.velocityAndFriction();    
     this.newPosition = [this.position[0] + this.velocity[0],
-                        this.position[1] + this.velocity[1] ];
-        
-    this.checkValidMove();
-    
-    this.position = this.newPosition;
-      
+                        this.position[1] + this.velocity[1] ];        
+    this.checkValidMove();    
+    this.position = this.newPosition;      
   }
   
   handleKeys() {
@@ -123,28 +139,7 @@ class Player {
     this.velocity[1] += y + this.acceleration[1];
   }
   
-  velocityAndFriction() {
-    if (!this.isJump) {
-      if(this.velocity[0] < 3 && this.velocity[0] > -3) {
-        if (this.velocity[0] < 0) 
-          this.velocity[0] = Math.ceil(this.velocity[0] * friction * 10) / 10;
-        else 
-          this.velocity[0] = Math.floor(this.velocity[0] * friction * 10) / 10;
-        if( this.velocity[0] <= 0.2 && this.velocity[0] >= -0.2 )
-          this.velocity[0] = 0;
-      } else 
-        this.velocity[0] = Math.round(this.velocity[0] * friction * 100) / 100;
-      
-    }
-      
-    
-    if ( this.velocity[0] > 10 ) {
-      this.velocity[0] = 10;
-    }
-    if (this.velocity[0] < -10 ) {
-      this.velocity[0] = -10;
-    }
-  }
+
   
   checkValidMove() {
     this.isJump = true;
@@ -176,15 +171,7 @@ class Player {
     walls.forEach(w =>{
       if (this.checkCollide(w))
         this.handleCollide(w);
-    });
-    
-  }
-  
-  checkCollide(obj) {
-    return  !( this.newPosition[1] + this.size[1] < obj.position[1] ||
-         this.newPosition[1] > obj.position[1] + obj.size[1] ||
-         this.newPosition[0] > obj.position[0] + obj.size[0] ||
-         this.newPosition[0] + this.size[0] < obj.position[0] );
+    });    
   }
   
   handleCollide(obj) {
@@ -203,19 +190,17 @@ class Player {
         this.reverseX = 1;
       }
       
-      this.velocity[0] = 0;
-      
-      if (this.isJump)
-        this.isWall = true;
+      this.velocity[0] = 0;      
+      if (this.isJump) this.isWall = true;
       
     } else {
       if(collideVector[1] < 0) {
         this.newPosition[1] -= this.newPosition[1] + this.size[1] - obj.position[1];
         this.isJump = false; 
       }
-      else 
+      else {
         this.newPosition[1] += obj.position[1] + obj.size[1] - this.newPosition[1];
-      
+      }
       this.velocity[1] = 0;
       
     }
@@ -232,17 +217,22 @@ function debugDraw() {
       return 'Down';
     else if (x == Key.LEFT)
       return 'Left';
-    else
+    else if (x == Key.RIGHT)
       return 'Right';
-  })
+  });
   
   ctx.fillStyle = "black";
   ctx.font = "10px Arial";
   ctx.fillText("Player Speed: " + player.velocity, 10, 10);
   ctx.fillText("Player wall: "+ player.isWall, 10, 20);
   ctx.fillText("Player Jump: " + player.isJump, 10, 30);
-  ctx.fillText("Keys Hit: " + k, 10, 40);
+  ctx.fillText("Keys Hit: " + k , 10, 40);
   
+}
+
+function loadLevel() {
+  walls.push(new GameObject(800, 600, 120, 120, 'black'));
+  walls.push(new GameObject(500, 400, 120, 120, 'black'));
 }
 
 function loop() {
@@ -256,8 +246,7 @@ function redraw() {
   walls.forEach(w => {
     w.draw();
   });
-  player.draw();
-  
+  player.draw();  
   if (debugLog) {
     debugDraw()
   }

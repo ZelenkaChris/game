@@ -164,7 +164,7 @@ class Character extends GameObject {
   }
 
   handleCollide2(obj) {
-    let deltaY = 0, deltaX = 0;
+    let deltaY = 0, deltaX = 0, dis = 0.01;
 
     if (this.velocity[0] < 0) {
       deltaX = obj.position[0] + obj.size[0] - this.newPosition[0];
@@ -180,7 +180,11 @@ class Character extends GameObject {
     }
 
     if (Math.abs(deltaX) < Math.abs(deltaY)) {
-      this.newPosition[0] += deltaX + 0.01;
+      this.newPosition[0] += deltaX;
+      if (deltaX > 0) 
+        this.newPosition[0] += dis;
+      else
+        this.newPosition[0] -= dis;
       this.velocity[0] = 0;
       if (deltaX > 0) this.reverseX = 1;
       else            this.reverseX = -1;

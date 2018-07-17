@@ -185,7 +185,8 @@ var Character = function (_GameObject) {
     key: 'handleCollide2',
     value: function handleCollide2(obj) {
       var deltaY = 0,
-          deltaX = 0;
+          deltaX = 0,
+          dis = 0.01;
 
       if (this.velocity[0] < 0) {
         deltaX = obj.position[0] + obj.size[0] - this.newPosition[0];
@@ -200,7 +201,8 @@ var Character = function (_GameObject) {
       }
 
       if (Math.abs(deltaX) < Math.abs(deltaY)) {
-        this.newPosition[0] += deltaX + 0.01;
+        this.newPosition[0] += deltaX;
+        if (deltaX > 0) this.newPosition[0] += dis;else this.newPosition[0] -= dis;
         this.velocity[0] = 0;
         if (deltaX > 0) this.reverseX = 1;else this.reverseX = -1;
         if (this.isJump) this.isWall = true;

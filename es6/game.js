@@ -164,12 +164,10 @@ class Character extends GameObject {
   }
 
   handleCollide2(obj) {
-    let deltaY = 100, deltaX = 0;
+    let deltaY = 0, deltaX = 0;
 
-    
     if (this.velocity[0] < 0) {
       deltaX = obj.position[0] + obj.size[0] - this.newPosition[0];
-
     } else {
       deltaX = obj.position[0] - (this.newPosition[0] + this.size[0]);
     }
@@ -184,9 +182,15 @@ class Character extends GameObject {
     if (Math.abs(deltaX) < Math.abs(deltaY)) {
       this.newPosition[0] += deltaX + 0.01;
       this.velocity[0] = 0;
+      if (deltaX > 0) this.reverseX = 1;
+      else            this.reverseX = -1;
+      if (this.isJump) this.isWall = true;
     } else if (Math.abs(deltaY) < Math.abs(deltaX)) {
-      this.newPosition[1] -= deltaY + 0.01;
+      this.newPosition[1] -= deltaY;
       this.velocity[1] = 0;
+      if (deltaY > 0) {
+        this.isJump = false;
+      }
     }
   }  
 

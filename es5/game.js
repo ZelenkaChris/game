@@ -184,7 +184,7 @@ var Character = function (_GameObject) {
   }, {
     key: 'handleCollide2',
     value: function handleCollide2(obj) {
-      var deltaY = 100,
+      var deltaY = 0,
           deltaX = 0;
 
       if (this.velocity[0] < 0) {
@@ -202,9 +202,14 @@ var Character = function (_GameObject) {
       if (Math.abs(deltaX) < Math.abs(deltaY)) {
         this.newPosition[0] += deltaX + 0.01;
         this.velocity[0] = 0;
+        if (deltaX > 0) this.reverseX = 1;else this.reverseX = -1;
+        if (this.isJump) this.isWall = true;
       } else if (Math.abs(deltaY) < Math.abs(deltaX)) {
-        this.newPosition[1] -= deltaY + 0.01;
+        this.newPosition[1] -= deltaY;
         this.velocity[1] = 0;
+        if (deltaY > 0) {
+          this.isJump = false;
+        }
       }
     }
   }]);

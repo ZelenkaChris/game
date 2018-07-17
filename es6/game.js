@@ -7,6 +7,11 @@ const playerSpeed = 10;
 const maxVel = 10;
 const friction = 0.96;
 
+const leftN = [-1, 0];
+const rightN = [1, 0];
+const upN = [0, 1];
+const downN = [0, -1];
+
 var walls = [];
 var enemies = [];
 var player;
@@ -123,7 +128,7 @@ class Character extends GameObject {
     
     walls.forEach(w =>{
       if (this.checkCollide(w))
-        this.handleCollide(w);
+        this.handleCollide2(w);
     });    
   }
   
@@ -156,7 +161,35 @@ class Character extends GameObject {
       this.velocity[1] = 0;
       
     }
+  }
+
+  handleCollide2(obj) {
+    let deltaY = 100, deltaX = 0;
+
+    
+    if (this.velocity[0] < 0) {
+      deltaX = obj.position[0] + obj.size[0] - this.newPosition[0];
+
+    } else {
+      deltaX = obj.position[0] - (this.newPosition[0] + this.size[0]);
+    }
+  
+    
+    if (this.velocity[1] > 0) {
+      deltaY = this.newPosition[1] + this.size[1] - obj.position[1];
+    } else {
+      deltaY = this.newPosition[1] - (obj.position[1] + obj.size[1]);
+    }
+
+    if (Math.abs(deltaX) < Math.abs(deltaY)) {
+      this.newPosition[0] += deltaX + 0.01;
+      this.velocity[0] = 0;
+    } else if (Math.abs(deltaY) < Math.abs(deltaX)) {
+      this.newPosition[1] -= deltaY + 0.01;
+      this.velocity[1] = 0;
+    }
   }  
+
 }
 
 class Enemy extends Character {
@@ -247,19 +280,19 @@ function debugDraw() {
       return 'Right';
   });
   
-  ctx.fillStyle = "black";
+  ctx.fillStyle = "red";
   ctx.font = "10px Arial";
   ctx.fillText("Player Speed: " + player.velocity, 10, 10);
   ctx.fillText("Player wall: "+ player.isWall, 10, 20);
   ctx.fillText("Player Jump: " + player.isJump, 10, 30);
   ctx.fillText("Keys Hit: " + k , 10, 40);
-  ctx.fillText("FPS: " + fps, 10, 50);
-  
+  ctx.fillText("FPS: " + fps, 10, 50);  
 }
 
 function loadLevel() {
-  walls.push(new GameObject(800, 600, 120, 120, 'black'));
-  walls.push(new GameObject(500, 400, 120, 120, 'black'));
+  walls.push(new GameObject(0, 0, 40, 720, 'black'));         //Far left wall
+  walls.push(new GameObject(1240, 0 , 40, 720, 'black'));     //Far right wall
+  walls.push(new GameObject(40, 680, 1200, 40, 'black'));      //Bottom wall
 }
 
 function loadEnemies() {
@@ -301,7 +334,7 @@ function control() {
 }
 
 function main() {
-  player = new Player(10,10,50,50);
+  player = new Player(50,40,40,40);
   loadEnemies();
   loadLevel();
   loop();

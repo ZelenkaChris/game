@@ -2,7 +2,7 @@ from Tkinter import *
 
 block_size = 40
 
-level = [[False for x in range(32)] for y in range(18)]   #[y][x] // [row][col]
+level = [[False for y in range(32)] for x in range(18)]   #[y][x] // [row][col]
 
 app = Tk()
 app.title("Map Maker")

@@ -15,6 +15,7 @@ var fps;
 
 var playerSpeed = 10;
 var maxVel = 10;
+var maxDrop = 39;
 var friction = 0.96;
 
 var leftN = [-1, 0];
@@ -25,6 +26,8 @@ var downN = [0, -1];
 var walls = [];
 var enemies = [];
 var player;
+
+var levelSize = [1280 * 2, 720 * 5];
 
 var Key = {
   pressed: {},
@@ -115,8 +118,9 @@ var Character = function (_GameObject) {
         }
       }
 
-      if (this.velocity[0] > 10) this.velocity[0] = 10;
-      if (this.velocity[0] < -10) this.velocity[0] = -10;
+      if (this.velocity[0] > maxVel) this.velocity[0] = maxVel;
+      if (this.velocity[0] < -maxVel) this.velocity[0] = -maxVel;
+      if (this.velocity[1] > maxDrop) this.velocity[1] = maxDrop;
     }
   }, {
     key: 'checkValidMove',
@@ -124,66 +128,15 @@ var Character = function (_GameObject) {
       var _this2 = this;
 
       this.isJump = true;
-      if (this.newPosition[0] < 0) {
-        this.newPosition[0] = 0;
-        this.velocity[0] = 0;
-        this.isWall = true;
-        this.reverseX = 1;
-      } else if (this.newPosition[0] + this.size[0] > 1280) {
-        this.newPosition[0] = 1280 - this.size[0];
-        this.velocity[0] = 0;
-        this.isWall = true;
-        this.reverseX = -1;
-      } else {
-        this.isWall = false;
-      }
-
-      if (this.newPosition[1] < 0) {
-        this.newPosition[1] = 0;
-        this.velocity[1] = 0;
-      }
-      if (this.newPosition[1] + this.size[1] > 720) {
-        this.newPosition[1] = 720 - this.size[1];
-        this.velocity[1] = 0;
-        this.isJump = false;
-        this.isWall = false;
-      }
+      this.isWall = false;
 
       walls.forEach(function (w) {
-        if (_this2.checkCollide(w)) _this2.handleCollide2(w);
+        if (_this2.checkCollide(w)) _this2.handleCollide(w);
       });
     }
   }, {
     key: 'handleCollide',
     value: function handleCollide(obj) {
-      var playerCenter = [this.newPosition[0] + this.size[0] / 2, this.newPosition[1] + this.size[1] / 2];
-      var objCenter = [obj.position[0] + obj.size[0] / 2, obj.position[1] + obj.size[1] / 2];
-      var collideVector = [playerCenter[0] - objCenter[0], playerCenter[1] - objCenter[1]];
-
-      if (Math.abs(collideVector[0]) > Math.abs(collideVector[1])) {
-        if (collideVector[0] < 0) {
-          this.newPosition[0] -= this.newPosition[0] + this.size[0] - obj.position[0] + 0.01;
-          this.reverseX = -1;
-        } else {
-          this.newPosition[0] += obj.position[0] + obj.size[0] - this.newPosition[0] - 0.01;
-          this.reverseX = 1;
-        }
-
-        this.velocity[0] = 0;
-        if (this.isJump) this.isWall = true;
-      } else {
-        if (collideVector[1] < 0) {
-          this.newPosition[1] -= this.newPosition[1] + this.size[1] - obj.position[1];
-          this.isJump = false;
-        } else {
-          this.newPosition[1] += obj.position[1] + obj.size[1] - this.newPosition[1];
-        }
-        this.velocity[1] = 0;
-      }
-    }
-  }, {
-    key: 'handleCollide2',
-    value: function handleCollide2(obj) {
       var deltaY = 0,
           deltaX = 0,
           dis = 0.01;
@@ -314,25 +267,32 @@ var Player = function (_Character2) {
   return Player;
 }(Character);
 
-function debugDraw() {
+function debugDraw(x, y) {
 
-  var k = Object.keys(Key.pressed).map(function (x) {
-    if (x == Key.UP) return 'Up';else if (x == Key.DOWN) return 'Down';else if (x == Key.LEFT) return 'Left';else if (x == Key.RIGHT) return 'Right';
+  var k = Object.keys(Key.pressed).map(function (b) {
+    if (b == Key.UP) return 'Up';else if (b == Key.DOWN) return 'Down';else if (b == Key.LEFT) return 'Left';else if (b == Key.RIGHT) return 'Right';
   });
 
+  ctx.fillStyle = 'rgba(100, 100, 100, 0.5';
+  ctx.fillRect(10 - x, 5 - y, 175, 85);
+
   ctx.fillStyle = "red";
-  ctx.font = "10px Arial";
-  ctx.fillText("Player Speed: " + player.velocity, 10, 10);
-  ctx.fillText("Player wall: " + player.isWall, 10, 20);
-  ctx.fillText("Player Jump: " + player.isJump, 10, 30);
-  ctx.fillText("Keys Hit: " + k, 10, 40);
-  ctx.fillText("FPS: " + fps, 10, 50);
+  ctx.font = "15px Arial";
+  ctx.fillText("Player Speed: " + player.velocity, 20 - x, 20 - y);
+  ctx.fillText("Player wall: " + player.isWall, 20 - x, 35 - y);
+  ctx.fillText("Player Jump: " + player.isJump, 20 - x, 50 - y);
+  ctx.fillText("Keys Hit: " + k, 20 - x, 65 - y);
+  ctx.fillText("FPS: " + fps, 20 - x, 80 - y);
 }
 
 function loadLevel() {
-  walls.push(new GameObject(0, 0, 40, 720, 'black')); //Far left wall
-  walls.push(new GameObject(1240, 0, 40, 720, 'black')); //Far right wall
-  walls.push(new GameObject(40, 680, 1200, 40, 'black')); //Bottom wall
+  walls.push(new GameObject(0, 0, 40, 720 * 5, 'black')); //Far left wall
+  walls.push(new GameObject(1240 * 2 + 40, 0, 40, 720 * 5, 'black')); //Far right wall
+  walls.push(new GameObject(40, 680 * 5 + 160, 1200 * 2 + 80, 40, 'black')); //Bottom wall
+  walls.push(new GameObject(40, 0, 1200 * 2 + 80, 40, 'black')); //Top Wall
+
+  walls.push(new GameObject(680, 560, 120, 120, 'black'));
+  walls.push(new GameObject(480, 400, 120, 120, 'black'));
 }
 
 function loadEnemies() {
@@ -353,7 +313,25 @@ function loop() {
 }
 
 function redraw() {
-  ctx.clearRect(0, 0, 1280, 720);
+  ctx.clearRect(0, 0, 1280 * 10, 720 * 10);
+  ctx.save();
+
+  var x = canvas.width / 2 - player.position[0];
+  var y = canvas.height / 2 - player.position[1];
+
+  if (x > 0) {
+    x = 0;
+  } else if (x < -(levelSize[0] - canvas.width)) {
+    x = -(levelSize[0] - canvas.width);
+  }
+
+  if (y > 0) {
+    y = 0;
+  } else if (y < -(levelSize[1] - canvas.height)) {
+    y = -(levelSize[1] - canvas.height);
+  }
+
+  ctx.translate(x, y);
   walls.forEach(function (w) {
     w.draw();
   });
@@ -362,8 +340,9 @@ function redraw() {
   });
   player.draw();
   if (debugLog) {
-    debugDraw();
+    debugDraw(x, y);
   }
+  ctx.restore();
 }
 
 function control() {

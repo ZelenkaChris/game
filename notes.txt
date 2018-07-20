@@ -34,3 +34,10 @@ Sample array output:
     walls.push(new GameObject(0, 0, 40, 720, 'black'));         //Far left wall
     walls.push(new GameObject(1240, 0 , 40, 720, 'black'));     //Far right wall
     walls.push(new GameObject(40, 680, 1200, 40, 'black));      //Bottom wall
+
+-histogram:
+1111        1111    =   4x1
+1110        2220    =   3x2
+0000
+0000
+

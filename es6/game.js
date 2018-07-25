@@ -250,6 +250,7 @@ function debugDraw(x, y) {
 }
 
 function loadLevel() {
+  /*
   walls.push(new GameObject(0, 0, 40, 720*5, 'black'));                   //Far left wall
   walls.push(new GameObject(1240 * 2 + 40, 0 , 40, 720*5, 'black'));               //Far right wall
   walls.push(new GameObject(40, 680*5 + 160, 1200 * 2 + 80, 40, 'black'));         //Bottom wall
@@ -257,6 +258,9 @@ function loadLevel() {
 
   walls.push(new GameObject(680, 560, 120, 120, 'black'));
   walls.push(new GameObject(480, 400, 120, 120, 'black'));
+  */
+
+
 }
 
 function loadEnemies() {
@@ -319,6 +323,7 @@ function control() {
 function main() {
   player = new Player(50,40,40,40);
   loadEnemies();
-  loadLevel();
+  //loadLevel();
+  loadMap();
   loop();
 }

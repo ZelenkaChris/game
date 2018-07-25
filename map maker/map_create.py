@@ -1,4 +1,5 @@
 from Tkinter import *
+import Tkinter, Tkconstants, tkFileDialog
 
 block_size = 40
 
@@ -37,8 +38,19 @@ def click(e):
         canvas.create_rectangle(x * block_size, y * block_size, x * block_size + block_size,  y * block_size + block_size, fill="black")
 
 def save():
-    for i in range(len(level)):
-        print level[i]
+    app.filename = tkFileDialog.asksaveasfilename(initialdir='../maps',filetypes=(('javascript', '*.js'),("all files","*.*")), defaultextension=".js")
+    if app.filename:
+        f = open(app.filename, 'w')
+        print app.filename
+        out_str = "function loadMap() {\n"
+        for i in range(len(level)):
+            for j in range(len(level[i])):
+                if level[i][j] == 1:
+                    out_str += "\twalls.push(new GameObject({}, {}, {}, {}, {}))\n".format(j * block_size, i * block_size, block_size, block_size, "'black'")
+        f.write(out_str + "}")
+    else:
+        print "canceled"
+    
 
 
 def testSave():
@@ -94,15 +106,13 @@ def testSave():
             print retArr[i][j],
         print
             
-        
+    
         
 
 canvas = Canvas(app)
 canvas.bind("<Button-1>", click)
 canvas.pack(fill="both", expand=True)
 
-#add_menus(app)
+add_menus(app)
 
-#app.mainloop()
-
-testSave()
+app.mainloop()
